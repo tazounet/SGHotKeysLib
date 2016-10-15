@@ -50,7 +50,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 	}
 }
 
-- (id) init {
+- (instancetype) init {
 	if (!hasInited) {
 		if ((self = [super init])) {
 			//Initialize the instance here.
@@ -68,10 +68,10 @@ static SGHotKeyCenter *sharedCenter = nil;
 	EventHotKeyRef carbonHotKey;
 	NSValue *key = nil;
 	
-	if ([[self allHotKeys] containsObject:theHotKey])
+	if ([self.allHotKeys containsObject:theHotKey])
 		[self unregisterHotKey:theHotKey];
 	
-	if (![[theHotKey keyCombo] isValidHotKeyCombo])
+	if (!(theHotKey.keyCombo).isValidHotKeyCombo)
 		return YES;
 	
 	static UInt32 currentId = 0;
@@ -94,7 +94,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 	key = [NSValue valueWithPointer:carbonHotKey];
 	
 	if (theHotKey && key)
-		[hotKeys setObject:theHotKey forKey:key];
+		hotKeys[key] = theHotKey;
 	
 	[self _updateEventHandler];
 	
@@ -106,7 +106,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 	EventHotKeyRef carbonHotKey;
 	NSValue *key = nil;
 	
-	if (![[self allHotKeys] containsObject:theHotKey])
+	if (![self.allHotKeys containsObject:theHotKey])
 		return;
 	
 	carbonHotKey = [self _carbonHotKeyForHotKey:theHotKey];
@@ -121,7 +121,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 }
 
 - (NSArray *)allHotKeys {
-	return [hotKeys allValues];
+	return hotKeys.allValues;
 }
 
 
@@ -129,8 +129,8 @@ static SGHotKeyCenter *sharedCenter = nil;
 	if (!theIdentifier)
 		return nil;
 	
-	for (SGHotKey *hotKey in [self allHotKeys]) {
-		if([[hotKey identifier] isEqual:theIdentifier] )
+	for (SGHotKey *hotKey in self.allHotKeys) {
+		if([hotKey.identifier isEqual:theIdentifier] )
 			return hotKey;
 	}
 	
@@ -157,7 +157,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 	NSAssert(hotKeyID.signature == kHotKeySignature, @"Invalid hot key id");
 	NSAssert(hotKeyID.id != 0, @"Invalid hot key id");
 	
-	for (SGHotKey *thisHotKey in [self allHotKeys]) {
+	for (SGHotKey *thisHotKey in self.allHotKeys) {
 		if ([thisHotKey matchesHotKeyID:hotKeyID]) {
 			hotKey = thisHotKey;
 			break;
@@ -179,7 +179,7 @@ static SGHotKeyCenter *sharedCenter = nil;
 
 - (SGHotKey *)_hotKeyForCarbonHotKey:(EventHotKeyRef)carbonHotKey {
 	NSValue *key = [NSValue valueWithPointer:carbonHotKey];
-	return [hotKeys objectForKey:key];
+	return hotKeys[key];
 }
 
 - (EventHotKeyRef)_carbonHotKeyForHotKey:(SGHotKey *)hotKey {
@@ -189,15 +189,15 @@ static SGHotKeyCenter *sharedCenter = nil;
 	values = [hotKeys allKeysForObject:hotKey];
 	NSAssert([values count] == 1, @"Failed to find Carbon Hotkey for SGHotKey");
 	
-	value = [values lastObject];
+	value = values.lastObject;
 	
-	return (EventHotKeyRef)[value pointerValue];
+	return (EventHotKeyRef)value.pointerValue;
 }
 
 - (void)_updateEventHandler {  
 	static EventHandlerUPP handler = NewEventHandlerUPP(hotKeyEventHandler);
 	
-	if ([hotKeys count] && eventHandlerInstalled == NO) {
+	if (hotKeys.count && eventHandlerInstalled == NO) {
 		EventTypeSpec eventSpec[1] = {
 			{ kEventClassKeyboard, kEventHotKeyPressed }
 		};

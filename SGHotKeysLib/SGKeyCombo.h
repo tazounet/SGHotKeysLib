@@ -16,12 +16,14 @@
 @property (nonatomic, assign) NSInteger keyCode;
 @property (nonatomic, assign) NSInteger modifiers;
 
-+ (id)clearKeyCombo;
-+ (id)keyComboWithKeyCode:(NSInteger)theKeyCode modifiers:(NSInteger)theModifiers;
-- (id)initWithKeyCode:(NSInteger)theKeyCode modifiers:(NSInteger)theModifiers;
+- (instancetype)init NS_UNAVAILABLE;
 
-- (id)initWithPlistRepresentation:(id)thePlist;
++ (id)clearKeyCombo;
++ (instancetype)keyComboWithKeyCode:(NSInteger)theKeyCode modifiers:(NSInteger)theModifiers;
+- (instancetype)initWithKeyCode:(NSInteger)theKeyCode modifiers:(NSInteger)theModifiers NS_DESIGNATED_INITIALIZER;
+
 - (id)plistRepresentation;
+- (instancetype)initWithPlistRepresentation:(id)thePlist;
 
 - (BOOL)isEqual:(SGKeyCombo *)theCombo;
 
